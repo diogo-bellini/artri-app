@@ -13,8 +13,7 @@ class ExercisePage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           ElevatedButton(
-            onPressed: () =>
-                context.go(PhysicalExerciseRoutes.physicalExercises),
+            onPressed: () => context.go(ExerciseOptionsRoutes.physicalExercise),
             style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xFF03A64A),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -33,26 +32,7 @@ class ExercisePage extends StatelessWidget {
           ),
           const Gap(16),
           ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFF03A64A),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              fixedSize: const Size(300, 50),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-            child: const Text(
-              'Informações',
-              style: TextStyle(
-                fontSize: 24,
-                color: Colors.white,
-              ),
-            ),
-          ),
-          const Gap(16),
-          ElevatedButton(
-            onPressed: () {},
+            onPressed: () => context.push(ExerciseOptionsRoutes.relaxation),
             style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xFF03A64A),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -63,6 +43,27 @@ class ExercisePage extends StatelessWidget {
             ),
             child: const Text(
               'Relaxamento',
+              style: TextStyle(
+                fontSize: 24,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          const Gap(16),
+          ElevatedButton(
+            onPressed: () =>
+                context.push(ExerciseOptionsRoutes.infoAtividadeFisica),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF03A64A),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              fixedSize: const Size(300, 80),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            child: const Text(
+              'Informações sobre atividades físicas',
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 24,
                 color: Colors.white,

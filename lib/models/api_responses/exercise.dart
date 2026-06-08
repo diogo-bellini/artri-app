@@ -1,37 +1,33 @@
+import 'package:artriapp/models/api_responses/index.dart';
 import 'package:artriapp/utils/enums/exercise_difficulty.dart';
 
 class Exercise {
-  final String id;
+  final int id;
   final String name;
   final String description;
-  final String link;
+  final String tutorialLink;
   final ExerciseDifficulty difficulty;
+  final ExerciseDetails details;
 
   Exercise({
     required this.id,
     required this.name,
     required this.description,
-    required this.link,
+    required this.tutorialLink,
     required this.difficulty,
+    required this.details,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'name': name,
-      'description': description,
-      'tutorial_link': link,
-      'difficulty': difficulty.index,
-    };
-  }
-
-  factory Exercise.fromMap(Map<String, dynamic> map) {
+  factory Exercise.fromJson(Map<String, dynamic> map) {
     return Exercise(
       id: map['id'],
       name: map['name'],
       description: map['description'],
-      link: map['tutorial_link'],
-      difficulty: ExerciseDifficulty.values[map['difficulty']],
+      tutorialLink: map['tutorial_link'],
+      difficulty: ExerciseDifficulty.fromString(map['difficulty']),
+      details: ExerciseDetails.fromString(
+        "sets_reps: ${map['sets_reps']}; rest: ${map['rest_time']}",
+      ),
     );
   }
 }

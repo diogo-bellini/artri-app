@@ -1,6 +1,7 @@
 import 'package:artriapp/routes/index.dart';
 import 'package:artriapp/utils/enums/input_text_type.dart';
-import 'package:artriapp/view_models/login_view_model.dart';
+import 'package:artriapp/utils/helpers/index.dart';
+import 'package:artriapp/view_models/index.dart';
 import 'package:artriapp/views/widgets/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -29,7 +30,7 @@ class LoginPage extends StatelessWidget {
       ),
       body: Consumer<LoginViewModel>(
         builder: (context, viewModel, child) {
-          final Size screenSize = MediaQuery.of(context).size;
+          final Size screenSize = ScreenHelper.getScreenSize(context);
 
           return SingleChildScrollView(
             child: Center(
@@ -38,12 +39,13 @@ class LoginPage extends StatelessWidget {
                 children: <Widget>[
                   ConstrainedBox(
                     constraints: BoxConstraints(
-                      maxWidth: screenSize.width * 0.8,
+                      maxWidth: screenSize.width * 0.80,
                     ),
                     child: Column(
                       children: [
                         SvgPicture.asset(
                           'assets/images/logo-ArtriApp-v2.svg',
+                          width: screenSize.width * 0.60,
                         ),
                         InputText(
                           placeholder: 'Usuário',
@@ -62,7 +64,7 @@ class LoginPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  CustomButton(
+                  CustomSolidButton(
                     text: 'ENTRAR',
                     onPressed: () async {
                       await viewModel.handleUserLoginButton(context);
@@ -100,10 +102,10 @@ class LoginPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  CustomButton(
+                  CustomSolidButton(
                     text: 'CADASTRAR',
                     onPressed: () {
-                      context.push(NotLoggedRoutes.signUp);
+                      context.go(NotLoggedRoutes.signUp);
                     },
                     borderRadius: 20,
                     gradientColors: const [

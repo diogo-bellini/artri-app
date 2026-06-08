@@ -1,46 +1,20 @@
 import 'package:artriapp/models/index.dart';
 import 'package:artriapp/routes/index.dart';
+import 'package:artriapp/utils/index.dart';
 import 'package:artriapp/views/index.dart';
 import 'package:artriapp/views/remedy/remedy_page.dart';
 import 'package:go_router/go_router.dart';
 
-class LoggedRoutes implements RoutesSession {
-  static const String diary = '/diary';
-  static const String exercise = '/exercise';
-  static const String info = '/info';
+abstract class LoggedRoutes implements RoutesSession {
   static const String remedy = '/remedy';
-  static const String evolution = '/evolution';
 
   static List<RouteBase> getGoRoutes() => [
-        ShellRoute(
-          builder: (context, state, child) => LoggedPage(
-            child: child,
-          ),
-          routes: [
-            ShellRoute(
-              builder: (context, state, child) => UserDiaryPage(
-                child: child,
-              ),
-              routes: UserDiaryRoutes.getGoRoutes(),
-            ),
-            GoRoute(
-              path: exercise,
-              builder: (context, state) => const ExercisePage(),
-              routes: ExerciseRoutes.getGoRoutes(),
-            ),
-            GoRoute(
-              path: info,
-              builder: (context, state) => const InfoPage(),
-            ),
-            GoRoute(
-              path: remedy,
-              builder: (context, state) => const RemedyPage(),
-            ),
-            GoRoute(
-              path: evolution,
-              builder: (context, state) => const InfoPage(),
-            ),
-          ],
+        ...BottomNavRoutes.getGoRoutes(),
+        ...PhysicalExerciseRoutes.getGoRoutes(),
+        GoRoute(
+          parentNavigatorKey: RouterKeys.appRoutesKey,
+          path: remedy,
+          builder: (context, state) => const RemedyPage(),
         ),
       ];
 }
