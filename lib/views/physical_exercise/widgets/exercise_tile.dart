@@ -4,38 +4,62 @@ import 'package:google_fonts/google_fonts.dart';
 
 class ExerciseTile extends StatelessWidget {
   final String exerciseName;
-  const ExerciseTile({super.key, required this.exerciseName});
+  final bool? isSelected; 
+  final ValueChanged<bool?>? onChanged; 
+
+  const ExerciseTile({
+    super.key, 
+    required this.exerciseName,
+    this.isSelected,
+    this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
     final double width = MediaQuery.sizeOf(context).width;
 
-    return Row(
-      spacing: 16,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Container(
-          height: width * 0.15,
-          width: width * 0.15,
-          decoration: BoxDecoration(
-            color: AppColors.lightBrown,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(
-            Icons.play_arrow,
-            color: Colors.white,
-            size: width * 0.1,
-          ),
+    return InkWell(
+      onTap: onChanged != null ? () => onChanged!(!(isSelected ?? false)) : null,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Row(
+          spacing: 16,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              height: width * 0.15,
+              width: width * 0.15,
+              decoration: BoxDecoration(
+                color: isSelected == true ? AppColors.darkGreen : AppColors.lightBrown,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.play_arrow,
+                color: Colors.white,
+                size: width * 0.1,
+              ),
+            ),
+            Flexible(
+              flex: 1,
+              fit: FlexFit.tight,
+              child: Text(
+                exerciseName,
+                style: GoogleFonts.montserrat(fontSize: 32),
+                overflow: TextOverflow.fade,
+                softWrap: false,
+              ),
+            ),
+
+            if (isSelected != null)
+              Checkbox(
+                value: isSelected,
+                activeColor: AppColors.darkGreen,
+                onChanged: onChanged,
+              ),
+          ],
         ),
-        Flexible(
-          flex: 1,
-          child: Text(
-            exerciseName,
-            style: GoogleFonts.montserrat(fontSize: 32),
-            overflow: TextOverflow.fade,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

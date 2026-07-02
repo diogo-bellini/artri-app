@@ -56,10 +56,10 @@ class _CustomExerciseFormViewState extends State<CustomExerciseFormView>{
                       final exercise = exercises[index];
                       final isSelected = viewModel.getSelectedExercisesForCurrentCategory().contains(exercise);
                       
-                      return CheckboxListTile(
-                        title: Text(exercise.name),
-                        value: isSelected,
-                        activeColor: AppColors.darkGreen,
+                      return ExerciseTile(
+                        // O split ajuda a limpar nomes longos, igual você fez na Overview
+                        exerciseName: exercise.name.split('-').first, 
+                        isSelected: isSelected,
                         onChanged: (_) => viewModel.toggleCustomExerciseSelection(exercise),
                       );
                     },
