@@ -41,4 +41,30 @@ class PhysicalExercisesService {
           exercises.where((e) => training.exercises.contains(e.id)).toList(),
     );
   }
+
+  Future<Map<String, List<Exercise>>> getCustomExercisesCategorized(
+    ExerciseDifficulty difficulty,
+  ) async {
+    final allTrainings = await getTrainings();
+    final allExercises = await getExercises();
+
+    final customTrainings = allTrainings.where(
+      (training) => training.name.contains('EXERCÍCIO PERSONALIZADO') && training.difficulty == difficulty
+    ).toList();
+
+    Map<String, List<Exercise>> categorizedExercises = {};
+
+    for(var training in customTrainings){
+      final parts = training.name.split(' - ');
+      final categoryName = parts.length == 3 ? parts[2] : 'Outros';
+
+      final exercisesForThisCategory = allExercises.where(
+        (exercise) => training.exercises.contains(exercise.id)
+      ).toList();
+
+      categorizedExercises[categoryName] = exercisesForThisCategory;
+    }
+
+    return categorizedExercises;
+  }
 }

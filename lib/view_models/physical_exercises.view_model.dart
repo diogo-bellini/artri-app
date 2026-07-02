@@ -22,6 +22,46 @@ class PhysicalExercisesViewModel extends ChangeNotifier {
 
   PhysicalExercisesViewModel(this._physicalExercisesService);
 
+  Map<String, List<Exercise>> _avaibleCustomExercises = {};
+  List<Exercise> _selectedCustomExercises = [];
+
+  Map<String, List<Exercise>> getAvaibleCustomExercises(){
+    return _avaibleCustomExercises;
+  }
+
+  List<Exercise> getSelectedCustomExercises(){
+    return _selectedCustomExercises;
+  }
+
+  Future<void> loadAvaibleCustomExercises() async {
+    if(_currentDifficulty == null){
+      log('Error: Dificuldade não selecionada para carregar exercícios personalizados');
+    }
+    _avaibleCustomExercises = await _physicalExercisesService.getCustomExercisesCategorized(_currentDifficulty!);
+    _selectedCustomExercises = [];
+    notifyListeners();
+  }
+
+  void toggleCustomExerciseSelection(Exercise exercise){
+    if(_selectedCustomExercises.contains(exercise)){
+      _selectedCustomExercises.remove(exercise);
+    }else{
+      _selectedCustomExercises.add(exercise);
+    }
+    notifyListeners();
+  }
+
+  void handleStartCustomExercises(BuildContext context){
+    if(_selectedCustomExercises.isEmpty){
+      log('Error: Nenhum exercício selecionado');
+      return;
+    }
+
+    _queuedExercises = _queueExercises(_selectedCustomExercises);
+
+    handleStartExercises(context);
+  }
+
   void handleTrainingTypeSelection(TrainingType type, BuildContext context) {
     _currentTrainingType = type;
 
@@ -34,6 +74,8 @@ class PhysicalExercisesViewModel extends ChangeNotifier {
         return PhysicalExerciseRoutes.handExercises;
       case TrainingType.feet:
         return PhysicalExerciseRoutes.feetExercises;
+      case TrainingType.custom:
+        return PhysicalExerciseRoutes.customExercises;
       default:
         return PhysicalExerciseRoutes.customExercises;
     }
@@ -51,6 +93,11 @@ class PhysicalExercisesViewModel extends ChangeNotifier {
     }
 
     var currentPath = RouterHelper.getUriFromContext(context);
+
+    if(_currentTrainingType == TrainingType.custom){
+      context.go('$currentPath/${difficulty.toString()}/rules');
+      return;
+    }
 
     var exercises = await _physicalExercisesService.getExercisesFromTraining(
       _currentTrainingType!,
