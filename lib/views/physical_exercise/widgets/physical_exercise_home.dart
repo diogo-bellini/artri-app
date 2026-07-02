@@ -1,10 +1,8 @@
-import 'package:artriapp/routes/physical_exercise.routes.dart';
 import 'package:artriapp/utils/enums/index.dart';
 import 'package:artriapp/utils/index.dart';
 import 'package:artriapp/view_models/index.dart';
 import 'package:artriapp/views/index.dart';
 import 'package:flutter/widgets.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
