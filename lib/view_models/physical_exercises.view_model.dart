@@ -4,6 +4,7 @@ import 'package:artriapp/models/index.dart';
 import 'package:artriapp/routes/index.dart';
 import 'package:artriapp/services/index.dart';
 import 'package:artriapp/utils/enums/index.dart';
+import 'package:artriapp/utils/exercise_rules_config.dart';
 import 'package:artriapp/utils/helpers/index.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -22,6 +23,96 @@ class PhysicalExercisesViewModel extends ChangeNotifier {
 
   PhysicalExercisesViewModel(this._physicalExercisesService);
 
+  int _currentStep = 0;
+
+  final List<String> _categoriesOrder = [
+    'mobilidade', 'aquecimento', 'braços', 'pernas', 'tronco', 'alongamento', 
+  ];
+
+  Map<String, List<Exercise>> _selectedExercisesByCategory = {
+    'MOBILIDADE': [],
+    'AQUECIMENTO': [],
+    'BRAÇOS': [],
+    'PERNAS': [],
+    'TRONCO': [],
+    'ALONGAMENTO': [],
+  };
+
+  List<Exercise> getSelectedExercisesForCurrentCategory() {
+    return _selectedExercisesByCategory[getCurrentCategory()] ?? [];
+  }
+
+  int getCurrentStep(){
+    return _currentStep;
+  }
+
+  String getCurrentCategory() {
+    return _categoriesOrder[_currentStep].toUpperCase();
+  }
+  
+  bool checkIfIsLastStep() {
+    return _currentStep == _categoriesOrder.length - 1;
+  }
+
+  int getRequiredAmountForCurrentStep(String difficulty) {
+    String categoryKey = getCurrentCategory(); 
+    String keyForRules = categoryKey.toLowerCase();
+    
+    return ExerciseRulesConfig.rulesByDifficulty[difficulty]?[keyForRules] ?? 0;
+  }
+
+  Map<String, List<Exercise>> _avaibleCustomExercises = {};
+
+  Map<String, List<Exercise>> getAvaibleCustomExercises(){
+    return _avaibleCustomExercises;
+  }
+
+  Future<void> loadAvaibleCustomExercises() async {
+    if(_currentDifficulty == null){
+      log('Error: Dificuldade não selecionada para carregar exercícios personalizados');
+    }
+    _avaibleCustomExercises = await _physicalExercisesService.getCustomExercisesCategorized(_currentDifficulty!);
+    _selectedExercisesByCategory.forEach((key, list) {
+      list.clear();
+    });
+    _currentStep = 0;
+    notifyListeners();
+  }
+
+  void toggleCustomExerciseSelection(Exercise exercise){
+    final currentList = _selectedExercisesByCategory[getCurrentCategory()]!;
+
+    if(currentList.contains(exercise)){
+      currentList.remove(exercise);
+    }else{
+      currentList.add(exercise);
+    }
+    notifyListeners();
+  }
+
+  bool canProceedToNextStep(String difficulty) {
+    final count = getSelectedExercisesForCurrentCategory().length;
+    final required = getRequiredAmountForCurrentStep(difficulty);
+    return count == required;
+  }
+
+  void prepareCustomWorkoutQueue() {
+    final allSelected = _selectedExercisesByCategory.values.expand((list) => list).toList();
+    _queuedExercises = _queueExercises(allSelected); 
+  }
+
+  void handleStartCustomExercises(BuildContext context, String difficulty){
+    if(!canProceedToNextStep(difficulty)){
+      log('Error: Não selecionou o número certo de exercícios');
+      return;
+    }
+
+    if(!checkIfIsLastStep()){
+      _currentStep++;
+      notifyListeners();
+    } 
+  }
+
   void handleTrainingTypeSelection(TrainingType type, BuildContext context) {
     _currentTrainingType = type;
 
@@ -34,6 +125,8 @@ class PhysicalExercisesViewModel extends ChangeNotifier {
         return PhysicalExerciseRoutes.handExercises;
       case TrainingType.feet:
         return PhysicalExerciseRoutes.feetExercises;
+      case TrainingType.custom:
+        return PhysicalExerciseRoutes.customExercises;
       default:
         return PhysicalExerciseRoutes.customExercises;
     }
@@ -51,6 +144,11 @@ class PhysicalExercisesViewModel extends ChangeNotifier {
     }
 
     var currentPath = RouterHelper.getUriFromContext(context);
+
+    if(_currentTrainingType == TrainingType.custom){
+      context.go('$currentPath/${difficulty.toString()}/rules');
+      return;
+    }
 
     var exercises = await _physicalExercisesService.getExercisesFromTraining(
       _currentTrainingType!,
@@ -133,6 +231,9 @@ class PhysicalExercisesViewModel extends ChangeNotifier {
     var cleanedPath = currentPath.path;
 
     if (hasCurrentExerciseId) {
+      cleanedPath =
+          '/${currentPathSegments.sublist(0, currentPathSegments.length - 1).join('/')}';
+    } else if (currentPathSegments.isNotEmpty && currentPathSegments.last == 'form') {
       cleanedPath =
           '/${currentPathSegments.sublist(0, currentPathSegments.length - 1).join('/')}';
     }
