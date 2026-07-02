@@ -4,6 +4,7 @@ import 'package:artriapp/models/index.dart';
 import 'package:artriapp/routes/index.dart';
 import 'package:artriapp/services/index.dart';
 import 'package:artriapp/utils/enums/index.dart';
+import 'package:artriapp/utils/exercise_rules_config.dart';
 import 'package:artriapp/utils/helpers/index.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -22,15 +23,48 @@ class PhysicalExercisesViewModel extends ChangeNotifier {
 
   PhysicalExercisesViewModel(this._physicalExercisesService);
 
+  int _currentStep = 0;
+
+  final List<String> _categoriesOrder = [
+    'mobilidade', 'aquecimento', 'braços', 'pernas', 'tronco', 'alongamento', 
+  ];
+
+  Map<String, List<Exercise>> _selectedExercisesByCategory = {
+    'MOBILIDADE': [],
+    'AQUECIMENTO': [],
+    'BRAÇOS': [],
+    'PERNAS': [],
+    'TRONCO': [],
+    'ALONGAMENTO': [],
+  };
+
+  List<Exercise> getSelectedExercisesForCurrentCategory() {
+    return _selectedExercisesByCategory[getCurrentCategory()] ?? [];
+  }
+
+  int getCurrentStep(){
+    return _currentStep;
+  }
+
+  String getCurrentCategory() {
+    return _categoriesOrder[_currentStep].toUpperCase();
+  }
+  
+  bool checkIfIsLastStep() {
+    return _currentStep == _categoriesOrder.length - 1;
+  }
+
+  int getRequiredAmountForCurrentStep(String difficulty) {
+    String categoryKey = getCurrentCategory(); 
+    String keyForRules = categoryKey.toLowerCase();
+    
+    return ExerciseRulesConfig.rulesByDifficulty[difficulty]?[keyForRules] ?? 0;
+  }
+
   Map<String, List<Exercise>> _avaibleCustomExercises = {};
-  List<Exercise> _selectedCustomExercises = [];
 
   Map<String, List<Exercise>> getAvaibleCustomExercises(){
     return _avaibleCustomExercises;
-  }
-
-  List<Exercise> getSelectedCustomExercises(){
-    return _selectedCustomExercises;
   }
 
   Future<void> loadAvaibleCustomExercises() async {
@@ -38,28 +72,44 @@ class PhysicalExercisesViewModel extends ChangeNotifier {
       log('Error: Dificuldade não selecionada para carregar exercícios personalizados');
     }
     _avaibleCustomExercises = await _physicalExercisesService.getCustomExercisesCategorized(_currentDifficulty!);
-    _selectedCustomExercises = [];
+    _selectedExercisesByCategory.forEach((key, list) {
+      list.clear();
+    });
+    _currentStep = 0;
     notifyListeners();
   }
 
   void toggleCustomExerciseSelection(Exercise exercise){
-    if(_selectedCustomExercises.contains(exercise)){
-      _selectedCustomExercises.remove(exercise);
+    final currentList = _selectedExercisesByCategory[getCurrentCategory()]!;
+
+    if(currentList.contains(exercise)){
+      currentList.remove(exercise);
     }else{
-      _selectedCustomExercises.add(exercise);
+      currentList.add(exercise);
     }
     notifyListeners();
   }
 
-  void handleStartCustomExercises(BuildContext context){
-    if(_selectedCustomExercises.isEmpty){
-      log('Error: Nenhum exercício selecionado');
+  bool canProceedToNextStep(String difficulty) {
+    final count = getSelectedExercisesForCurrentCategory().length;
+    final required = getRequiredAmountForCurrentStep(difficulty);
+    return count == required;
+  }
+
+  void handleStartCustomExercises(BuildContext context, String difficulty){
+    if(!canProceedToNextStep(difficulty)){
+      log('Error: Não selecionou o número certo de exercícios');
       return;
     }
 
-    _queuedExercises = _queueExercises(_selectedCustomExercises);
-
-    handleStartExercises(context);
+    if(!checkIfIsLastStep()){
+      _currentStep++;
+      notifyListeners();
+    } else {
+      final allSelected = _selectedExercisesByCategory.values.expand((list) => list).toList();
+      _queuedExercises = _queueExercises(allSelected);
+      handleStartExercises(context);
+    }
   }
 
   void handleTrainingTypeSelection(TrainingType type, BuildContext context) {

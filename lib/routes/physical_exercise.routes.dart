@@ -3,6 +3,8 @@ import 'package:artriapp/routes/index.dart';
 import 'package:artriapp/utils/helpers/index.dart';
 import 'package:artriapp/utils/index.dart';
 import 'package:artriapp/views/index.dart';
+import 'package:artriapp/views/physical_exercise/widgets/custom_exercise_form_view.dart';
+import 'package:artriapp/views/physical_exercise/widgets/custom_exercise_rule_view.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -99,6 +101,20 @@ class PhysicalExerciseRoutes implements RoutesSession {
                   path: ':difficulty',
                   builder: (context, state) =>
                       const PhysicalExerciseRoutineOverview(),
+                  routes: [
+                    GoRoute(
+                      path: 'rules',
+                      builder: (context, state) => CustomExerciseRuleView(
+                        difficulty: state.pathParameters['difficulty'] ?? 'easy',
+                      ),
+                    ),
+                    GoRoute(
+                      path: 'form',
+                      builder: (context, state) => CustomExerciseFormView(
+                        difficulty: state.pathParameters['difficulty'] ?? 'easy',
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
