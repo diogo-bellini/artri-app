@@ -96,6 +96,11 @@ class PhysicalExercisesViewModel extends ChangeNotifier {
     return count == required;
   }
 
+  void prepareCustomWorkoutQueue() {
+    final allSelected = _selectedExercisesByCategory.values.expand((list) => list).toList();
+    _queuedExercises = _queueExercises(allSelected); 
+  }
+
   void handleStartCustomExercises(BuildContext context, String difficulty){
     if(!canProceedToNextStep(difficulty)){
       log('Error: Não selecionou o número certo de exercícios');
@@ -105,11 +110,7 @@ class PhysicalExercisesViewModel extends ChangeNotifier {
     if(!checkIfIsLastStep()){
       _currentStep++;
       notifyListeners();
-    } else {
-      final allSelected = _selectedExercisesByCategory.values.expand((list) => list).toList();
-      _queuedExercises = _queueExercises(allSelected);
-      handleStartExercises(context);
-    }
+    } 
   }
 
   void handleTrainingTypeSelection(TrainingType type, BuildContext context) {
@@ -230,6 +231,9 @@ class PhysicalExercisesViewModel extends ChangeNotifier {
     var cleanedPath = currentPath.path;
 
     if (hasCurrentExerciseId) {
+      cleanedPath =
+          '/${currentPathSegments.sublist(0, currentPathSegments.length - 1).join('/')}';
+    } else if (currentPathSegments.isNotEmpty && currentPathSegments.last == 'form') {
       cleanedPath =
           '/${currentPathSegments.sublist(0, currentPathSegments.length - 1).join('/')}';
     }

@@ -114,6 +114,12 @@ class PhysicalExerciseRoutes implements RoutesSession {
                         difficulty: state.pathParameters['difficulty'] ?? 'easy',
                       ),
                     ),
+                    GoRoute(
+                      path: ':exerciseId',
+                      builder: (context, state) => ExerciseRoutineStepView(
+                        key: ValueKey(state.pathParameters['exerciseId']),
+                      ),
+                    ),
                   ],
                 ),
               ],
