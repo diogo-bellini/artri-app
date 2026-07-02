@@ -57,7 +57,6 @@ class _CustomExerciseFormViewState extends State<CustomExerciseFormView>{
                       final isSelected = viewModel.getSelectedExercisesForCurrentCategory().contains(exercise);
                       
                       return ExerciseTile(
-                        // O split ajuda a limpar nomes longos, igual você fez na Overview
                         exerciseName: exercise.name.split('-').first, 
                         isSelected: isSelected,
                         onChanged: (_) => viewModel.toggleCustomExerciseSelection(exercise),
